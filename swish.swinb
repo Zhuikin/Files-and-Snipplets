@@ -5,7 +5,7 @@
 
 Prolog is eine deklarative Sprache, die sich besonders zur Verarbeitung von formaler Logik eignet.
 Es werden Fakten und Prädikate (Regeln) festgelegt und verarbeitet. 
-In dem dokument sehen wir "Programe" und Queries. Eine Query fragt ab, ob eine Aussage unter den im "Program" gegebenen Voraussetzungen true oder false ist. Queries können auch ausgeben, welche Fakten, wenn überhaupt, die Anfrage wahr machen würden.
+In dem Dokument sehen wir "Programe" und Queries. Eine Query fragt ab, ob eine Aussage unter der im "Program" festgelegten Wissensbasis wahr oder falsch ist. Queries können auch ausgeben, welche Fakten, wenn überhaupt, die Anfrage wahr machen würden.
 
     % Queries werden eingeletet mit:
     ?-
@@ -15,7 +15,12 @@ Für die Beispiele hier wird SWISH verwendet.
 
 https://swish.swi-prolog.org/
 
-Swish ist ein online Prolog-Interpreter mit Notebook funktionen, ähnlich den aus dem Python Kurs bekannten Jupiter Notebooks.
+SWISH ist ein online Prolog-Interpreter mit Notebook, ähnlich den aus dem Python Kurs bekannten Jupiter Notebooks. Auf der Seite https://www.swi-prolog.org/ findet man auch SWI-Prolog zum herunterladen und installieren (Allerdings ohne das SWISH Notebook interface).
+
+#### Dieses Notebook
+Das notebook liegt auf Gihub bereit und kann interaktiv in SWISH geladen werden (Es ist safe mit den Zellen zu experementieren - Änderungen werden *nicht* ins repository übernommen.):
+
+https://swish.swi-prolog.org/?code=https://raw.githubusercontent.com/Zhuikin/Files-and-Snipplets/main/swish.swinb
 
 ### Hello World!
 </div>
@@ -25,7 +30,7 @@ Swish ist ein online Prolog-Interpreter mit Notebook funktionen, ähnlich den au
 message :-
 	write('Hello World!'), 
     nl.
-% der . (Punkt) signalisert das Ende eines Prädikats.
+% der . (Punkt) signalisert das Ende eines Prädikats, Regel, oder Query.
 % Prozentzeichen leitet ein Kommentar ein
 
 </div>
@@ -38,7 +43,7 @@ message.
 
 <div class="nb-cell markdown" name="md19">
 #### Neck-Operator
-Der Operator :- verbindet bei der Festlegung von Prädikaten den Kopf (head) und Körper (body).
+Der Operator :- verbindet bei der Festlegung von Regeln den Kopf (head) und Körper (body).
 
     head :-
         body	
@@ -50,8 +55,9 @@ Der Operator :- verbindet bei der Festlegung von Prädikaten den Kopf (head) und
 ### Beispiel Fragestellung (Constraint satisfaction): 
 Bei Constraint Satisfaction (Bedingungserfüllungsproblem) Problemen wird eine Variable (oder eine Variablenblegung) gesucht, die eine Reihe festgelegter Bedingungen oder Voraussetzungen (constraints) erfüllt. Diese Probleme sind oft sehr schwierig und haben eine hohe kombinatorische Komplexität (Die Suchräume werde bei vielen Variablen und Bedingungen sehr gross). 
 
-Ein überschauberes Beispiel:
+Prolog eignet sich recht gut dazu, solche Probleme darzustellen. Die Constraints können als Regeln in die Wissensbasis eingebaut werden um dan mit Queries Lösungen oder Lösbarkeit zu unteruchen.
 
+### Ein überschauberes Beispiel:
 #### Terminabgleich bei mehreren Teilnehmern
 Alice, Bob und Eve wollen sich treffen und suchen nech einem Termin.
 </div>
@@ -59,7 +65,7 @@ Alice, Bob und Eve wollen sich treffen und suchen nech einem Termin.
 <div class="nb-cell markdown" name="md3">
 #### Bedingungen:
 * Alice kann Montag, Dienstag, Mittwoch
-* Bob kann Dienstag, Mittwoch, Freitag
+* Bob kann Dienstag, Mittwoch, Donnerstag, Freitag
 * Eve kann Mittwoch, Donnerstag, Fretitag
 </div>
 
@@ -71,6 +77,7 @@ alice_got_time("Wed").
 
 bob_got_time("Tue").
 bob_got_time("Wed").
+bob_got_time("Thu").
 bob_got_time("Fri").
 
 eve_got_time("Wed").
@@ -87,7 +94,7 @@ meeting(Day) :-
 </div>
 
 <div class="nb-cell markdown" name="md4">
-Finde einen wert für Variable Day, der mit allen Fakten verträglich ist:
+Finde einen wert für die Variable Day, der mit allen Fakten verträglich ist:
 </div>
 
 <div class="nb-cell query" name="q1">
@@ -103,13 +110,15 @@ Die Fakten kann man auch komplexer und flexibler darstellen. Z.B. mit Listen.
 % Listen werden wie in Python als [..] angegeben
 meeting_from_list(Day) :-
 	member(Day, ["Mon", "Tue", "Wed"]), % Alice AND
-	member(Day, ["Tue", "Wed", "Fri"]), % Bob AND
+	member(Day, ["Tue", "Wed", "Thu", "Fri"]), % Bob AND
     member(Day, ["Wed", "Thu", "Fri"]). % Eve
 
 </div>
 
 <div class="nb-cell query" name="q4">
-meeting_from_list(Day).
+% Die "cut" Regel (!.) legt fest, die Suche nach dem ersten Treffer abzubrechen
+meeting_from_list(Day),
+!.
 
 </div>
 
@@ -119,12 +128,12 @@ member/2 ist ein built in Prädikat, dass die zusammengehörigkeit in einer List
 </div>
 
 <div class="nb-cell query" name="q5">
-member(1, [1, 2, 3, 4]).
+member(1, [1, 2, 3, 4]), !.
 
 </div>
 
 <div class="nb-cell query" name="q6">
-member(8, [1, 2, 3, 4]).
+member(8, [1, 2, 3, 4]), !.
 
 </div>
 
@@ -138,8 +147,9 @@ member(X, [1, 2, 3, 4]).
 </div>
 
 <div class="nb-cell markdown" name="md9">
-#### Weitere Mengen-Prädikate, z.B.
-* findall( X, Regel, Liste ) : finde alle X die Regel erfüllen, und sammle sie in Liste
+#### Weitere eingebaute Prädikate, z.B.
+#### Findall
+* findall( X, Regel, Liste ) : finde alle *X*, die *Regel* erfüllen, und sammle sie in *Liste*
 </div>
 
 <div class="nb-cell program" name="p6">
@@ -151,6 +161,10 @@ eats(eve, veggies).
 
 <div class="nb-cell markdown" name="md14">
 Bob und Alice sind in Meateaters.
+
+   MeatEaters ist in der Query ein Singleton.
+   Ein Singleton ist eine Variable, die in einem Prädikat nur ein Mal vorkommt.
+   Prolog erkennt das Singleton hier als die "unabhängige" Variable nach der gefragt wird.
 </div>
 
 <div class="nb-cell query" name="q9">
@@ -159,7 +173,8 @@ findall(P, eats(P, meat), MeatEaters).
 </div>
 
 <div class="nb-cell markdown" name="md10">
-* forall( C, Rule ) : ist true, wenn Rule für alle möglichen C erfüllt ist.
+#### Forall
+* forall( C, Rule ) : ist erfüllt, wenn *Rule* für alle möglichen Belegungen von *C* erfüllt ist.
 </div>
 
 <div class="nb-cell markdown" name="md13">
@@ -181,13 +196,13 @@ forall(findall(P, eats(P, meat), MeatEaters), member(eve, MeatEaters)).
 </div>
 
 <div class="nb-cell markdown" name="md12">
-#### Zurück zur Terminfrage:
-Mit den Mengenprädikaten member, findall und forall können wir nun den Terminabgleich etwas allgemeiner gestalten:
+#### Zurück zur Termin Frage:
+Mit den Prädikaten *member*, *findall* und *forall* können wir nun den Terminabgleich etwas allgemeiner gestalten:
 </div>
 
 <div class="nb-cell program" name="p7">
 available(alice, ["Mon", "Tue", "Wed"]).
-available(bob, ["Tue", "Wed", "Fri", "Thu"]).
+available(bob, ["Tue", "Wed", "Thu", "Fri"]).
 available(eve, ["Wed", "Thu", "Fri"]).
 available(charlie, ["Mon", "Tue", "Wed", "Thu", "Fri"]).
 
@@ -200,7 +215,7 @@ available_day(Day) :-
 choose(Day) :-
 	member(Day, ["Mon", "Tue", "Wed", "Thu", "Fri"]),
 	available_day(Day),
-    !. % das !/1 oder "cut" weist an, die Auswertung nach dem ersten Treffer zu beenden
+    !.
 
 </div>
 
@@ -210,7 +225,7 @@ choose(Day)
 </div>
 
 <div class="nb-cell markdown" name="md15">
-#### Und nun noch eine Kleinigkeit...
+#### Und nun noch eine "Kleinigkeit"...
 Bisher wurden die Regeln und aussagen mit , (Komma für AND bzw conjunktion) verbunden.
 </div>
 
